@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-2RNJ72H75W"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-2RNJ72H75W');
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ウマ娘 なんでも超回復メーカー</title>
+    <meta name="description" content="ウマ娘プリティーダービーの温泉郷シナリオの「超回復」演出を再現できるファンメイド画像メーカーです。お好きな画像で超回復してみましょう。">
+
+    <meta property="og:title" content="ウマ娘 なんでも超回復メーカー">
+    <meta property="og:description" content="ウマ娘の温泉郷シナリオ「超回復」文字演出を再現！お好きな画像で超回復しましょう。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://nyaftama.github.io/uma-hyper-recovery/">
+    <meta property="og:site_name" content="なんでも超回復メーカー">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <!-- HEIC / HEIF Image Converter -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
+
+    <link rel="stylesheet" href="css/style.css?v=0.93a">
+</head>
+
+<body>
+
+    <div class="container">
+        <!-- Header Meta -->
+        <div class="header-meta">
+            <span class="version-badge">v0.93a</span>
+            <a href="https://nyaftama.github.io/" target="_blank" rel="noopener noreferrer" class="credit-link">
+                作った人: <strong>@nyaftama</strong>
+            </a>
+        </div>
+
+        <!-- Title Header -->
+        <h1 class="main-title">
+            ウマ娘 なんでも超回復メーカー<br>
+            <span class="sub-title">「超回復」画像作成ツール</span>
+        </h1>
+        <div class="eng-title">UMAMUSUME HYPER RECOVERY BANNER MAKER</div>
+
+        <!-- Card 1: Settings & Input -->
+        <div class="card">
+            <div class="card-title">
+                画像とテキストの設定
+            </div>
+
+            <!-- Image Upload Dropzone -->
+            <div id="dropzone" class="dropzone">
+                <svg class="dropzone-icon" viewBox="0 0 24 24">
+                    <path
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
+                </svg>
+                <div class="dropzone-text">画像を選択またはドラッグ＆ドロップ</div>
+                <div class="dropzone-subtext">クリップボードからの貼り付け（Ctrl+V / Cmd+V）にも対応</div>
+                <input type="file" id="fileInput" class="file-input" accept="image/*,.heic,.heif">
+            </div>
+
+            <!-- Dropzone Controls -->
+            <div class="dropzone-controls"
+                style="margin-top: 10px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <button type="button" id="pasteImgBtn" class="btn btn-secondary btn-small">
+                    コピーした画像を貼り付け
+                </button>
+                <button type="button" id="resetImgBtn" class="btn btn-secondary btn-small">
+                    リセット
+                </button>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+
+            <!-- Text Keyword Input (Line 2) -->
+            <div class="form-group">
+                <label for="textKeyword" class="form-label">発動キーワード（「超回復 ○○パワー発動!」）</label>
+                <input type="text" id="textKeyword" class="input-text" value="温泉" placeholder="例: 温泉">
+                <div id="textKeywordError" class="input-error-msg" style="display: none;">
+                    <svg class="error-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"
+                        style="vertical-align: middle; margin-right: 4px;">
+                        <path
+                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                    </svg>
+                    <span>使用できないキーワードが含まれています</span>
+                </div>
+
+                <!-- Quick Preset Chips -->
+                <div class="presets-wrapper">
+                    <button type="button" class="preset-chip" data-preset="温泉">温泉</button>
+                    <button type="button" class="preset-chip" data-preset="睡眠">睡眠</button>
+                    <button type="button" class="preset-chip" data-preset="休日">休日</button>
+                    <button type="button" class="preset-chip" data-preset="焼肉">焼肉</button>
+                    <button type="button" class="preset-chip" data-preset="ラーメン">ラーメン</button>
+                    <button type="button" class="preset-chip" data-preset="推し活">推し活</button>
+                    <button type="button" class="preset-chip" data-preset="ガチャ">ガチャ</button>
+                    <button type="button" class="preset-chip" data-preset="サウナ">サウナ</button>
+                    <button type="button" class="preset-chip" data-preset="二度寝">二度寝</button>
+                    <button type="button" class="preset-chip" data-preset="ゲーム">ゲーム</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Card 2: Preview Canvas Area -->
+        <div class="card canvas-card">
+            <div class="card-title" style="width: 100%;">
+                プレビュー（文字や画像をドラッグできます）
+            </div>
+
+            <!-- Drag Target Mode Selector -->
+            <div
+                style="margin-bottom: 8px; display: flex; gap: 20px; align-items: center; justify-content: center; flex-wrap: wrap;">
+                <span style="font-size: 0.85rem; font-weight: bold; color: #444;">ドラッグ移動対象:</span>
+                <label class="toggle-wrapper">
+                    <input type="radio" name="dragTarget" value="text" checked>
+                    <span>文字の位置</span>
+                </label>
+                <label class="toggle-wrapper">
+                    <input type="radio" name="dragTarget" value="image">
+                    <span>画像の位置</span>
+                </label>
+            </div>
+            <div style="margin-bottom: 12px; display: flex; justify-content: center;">
+                <button type="button" id="rotateImgBtn" class="btn btn-secondary btn-small">
+                    画像を90°回転
+                </button>
+            </div>
+
+            <div class="canvas-wrapper">
+                <canvas id="previewCanvas" width="900" height="600"></canvas>
+            </div>
+
+            <div class="canvas-controls">
+                <button type="button" id="shuffleSparklesBtn" class="btn btn-secondary btn-small">
+                    キラキラをシャッフル
+                </button>
+                <button type="button" id="resetBtn" class="btn btn-secondary btn-small">
+                    初期位置にリセット
+                </button>
+            </div>
+
+            <!-- Advanced Settings Accordion -->
+            <details class="advanced-settings">
+                <summary>詳細設定（文字サイズ・位置・画像拡大率）</summary>
+
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label for="textSize" class="form-label">文字サイズ</label>
+                        <div class="range-wrapper">
+                            <input type="range" id="textSize" class="range-input" min="40" max="150" value="70">
+                            <span id="textSizeVal" class="range-val">70</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="posY" class="form-label">文字の上下位置 (Y)</label>
+                        <div class="range-wrapper">
+                            <input type="range" id="posY" class="range-input" min="10" max="90" value="75">
+                            <span id="posYVal" class="range-val">75%</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="posX" class="form-label">文字の左右位置 (X)</label>
+                        <div class="range-wrapper">
+                            <input type="range" id="posX" class="range-input" min="10" max="90" value="50">
+                            <span id="posXVal" class="range-val">50%</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="imgScale" class="form-label">画像の拡大率</label>
+                        <div class="range-wrapper">
+                            <input type="range" id="imgScale" class="range-input" min="50" max="250" value="100">
+                            <span id="imgScaleVal" class="range-val">100%</span>
+                        </div>
+                    </div>
+                </div>
+            </details>
+        </div>
+
+        <!-- Main Action Buttons -->
+        <div class="btn-group">
+            <button type="button" id="generateBtn" class="btn btn-primary">
+                「超回復」画像を生成
+            </button>
+            <button type="button" id="copyBtn" class="btn btn-secondary">
+                クリップボードにコピー
+            </button>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>※当ツールは「ウマ娘 プリティーダービー」の非公式ツールです。</p>
+            <p>&copy; 2026 nyaftama</p>
+        </footer>
+    </div>
+
+    <!-- Save / Share Modal -->
+    <div id="shareModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="modal-title">超回復画像が完成しました！</h3>
+            <p class="modal-desc">
+                画像を長押し（または右クリック）でデバイスに保存できます。<br>
+                <span style="color: var(--primary-color); font-weight: bold;">X（Twitter）でシェアする際は、保存した画像を添付してください。</span>
+            </p>
+
+            <div class="modal-image-wrapper">
+                <img id="shareImagePreview" src="" alt="超回復画像">
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" id="downloadModalBtn" class="btn btn-primary">
+                    ダウンロード
+                </button>
+                <a id="twitterShareBtn" class="btn btn-twitter" href="#" target="_blank" rel="noopener noreferrer">
+                    Xでシェア
+                </a>
+            </div>
+
+            <div class="modal-actions-secondary">
+                <button type="button" id="closeModalBtn" class="btn btn-secondary" style="width: 100%;">
+                    閉じる
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script src="js/app.js?v=0.93a" defer></script>
+</body>
+
+</html>
