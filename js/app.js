@@ -386,8 +386,46 @@ document.addEventListener('DOMContentLoaded', () => {
         textCacheCtx.restore();
     }
 
+    // --- Clamp Image Position (Prevent gaps when scale >= 100%) ---
+    function clampImagePosition() {
+        if (!state.bgImage || state.imgScale < 100) return;
+
+        const rotDeg = state.imgRotation || 0;
+        const isSwapped = (rotDeg === 90 || rotDeg === 270);
+
+        const effImgW = isSwapped ? state.bgImage.height : state.bgImage.width;
+        const effImgH = isSwapped ? state.bgImage.width : state.bgImage.height;
+
+        const imgRatio = effImgW / effImgH;
+        const canvasRatio = canvas.width / canvas.height;
+        let renderW, renderH;
+
+        if (imgRatio > canvasRatio) {
+            renderH = canvas.height;
+            renderW = canvas.height * imgRatio;
+        } else {
+            renderW = canvas.width;
+            renderH = canvas.width / imgRatio;
+        }
+
+        const scaleRatio = state.imgScale / 100;
+        const finalW = renderW * scaleRatio;
+        const finalH = renderH * scaleRatio;
+
+        const maxOffsetX = (finalW - canvas.width) / 2;
+        const maxOffsetY = (finalH - canvas.height) / 2;
+
+        const maxImgX = (maxOffsetX / canvas.width) * 100;
+        const maxImgY = (maxOffsetY / canvas.height) * 100;
+
+        state.imgX = Math.max(-maxImgX, Math.min(maxImgX, state.imgX));
+        state.imgY = Math.max(-maxImgY, Math.min(maxImgY, state.imgY));
+    }
+
     // --- Render Canvas ---
     function renderCanvas() {
+        clampImagePosition();
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         ctx.shadowColor = 'transparent';
