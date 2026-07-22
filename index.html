@@ -30,7 +30,7 @@
     <!-- HEIC / HEIF Image Converter -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=0.94">
+    <link rel="stylesheet" href="css/style.css?v=0.94a">
 </head>
 
 <body>
@@ -38,7 +38,7 @@
     <div class="container">
         <!-- Header Meta -->
         <div class="header-meta">
-            <span class="version-badge">v0.94</span>
+            <span class="version-badge">v0.94a</span>
             <a href="https://nyaftama.github.io/" target="_blank" rel="noopener noreferrer" class="credit-link">
                 作った人: <strong>@nyaftama</strong>
             </a>
@@ -237,29 +237,51 @@
     <!-- Save / Share Modal -->
     <div id="shareModal" class="modal-overlay">
         <div class="modal-content">
-            <h3 class="modal-title">超回復画像が完成しました！</h3>
-            <p class="modal-desc">
-                画像を長押し（または右クリック）でデバイスに保存できます。<br>
-                <span style="color: var(--primary-color); font-weight: bold;">X（Twitter）でシェアする際は、保存した画像を添付してください。</span>
-            </p>
+            <!-- Step 1: Default View -->
+            <div id="shareStep1">
+                <h3 class="modal-title">超回復画像が完成しました！</h3>
+                <p class="modal-desc">
+                    画像を長押し（または右クリック）でデバイスに保存できます。<br>
+                    <span
+                        style="color: var(--primary-color); font-weight: bold;">X（Twitter）でシェアする際は、保存した画像を添付してください。</span>
+                </p>
 
-            <div class="modal-image-wrapper">
-                <img id="shareImagePreview" src="" alt="超回復画像">
+                <div class="modal-image-wrapper">
+                    <img id="shareImagePreview" src="" alt="超回復画像">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" id="downloadModalBtn" class="btn btn-primary">
+                        ダウンロード
+                    </button>
+                    <a id="twitterShareBtn" class="btn btn-twitter" href="#" target="_blank" rel="noopener noreferrer">
+                        Xでシェア
+                    </a>
+                </div>
+
+                <div class="modal-actions-secondary">
+                    <button type="button" id="closeModalBtn" class="btn btn-secondary" style="width: 100%;">
+                        閉じる
+                    </button>
+                </div>
             </div>
 
-            <div class="modal-actions">
-                <button type="button" id="downloadModalBtn" class="btn btn-primary">
-                    ダウンロード
-                </button>
-                <a id="twitterShareBtn" class="btn btn-twitter" href="#" target="_blank" rel="noopener noreferrer">
-                    Xでシェア
-                </a>
-            </div>
+            <!-- Step 2: Warning View when image is not saved/copied -->
+            <div id="shareStep2" style="display: none;">
+                <h3 class="modal-title">画像が保存またはコピーされていないようです</h3>
+                <p class="modal-desc">
+                    画像が保存されていない場合、X（Twitter）に画像を添付できません。<br>
+                    画像をクリップボードにコピーしてからXを開くか、前の画面に戻って画像を保存してください。
+                </p>
 
-            <div class="modal-actions-secondary">
-                <button type="button" id="closeModalBtn" class="btn btn-secondary" style="width: 100%;">
-                    閉じる
-                </button>
+                <div class="modal-actions" style="margin-top: 15px;">
+                    <button type="button" id="copyAndShareBtn" class="btn btn-twitter">
+                        コピーしてXを開く
+                    </button>
+                    <button type="button" id="shareStep2BackBtn" class="btn btn-secondary">
+                        戻る
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -267,7 +289,7 @@
     <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
 
-    <script src="js/app.js?v=0.94" defer></script>
+    <script src="js/app.js?v=0.94a" defer></script>
 </body>
 
 </html>

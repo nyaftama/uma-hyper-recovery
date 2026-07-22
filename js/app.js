@@ -176,10 +176,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyBtn = document.getElementById('copyBtn');
 
     const shareModal = document.getElementById('shareModal');
+    const shareStep1 = document.getElementById('shareStep1');
+    const shareStep2 = document.getElementById('shareStep2');
     const shareImagePreview = document.getElementById('shareImagePreview');
     const downloadModalBtn = document.getElementById('downloadModalBtn');
     const twitterShareBtn = document.getElementById('twitterShareBtn');
     const closeModalBtn = document.getElementById('closeModalBtn');
+    const copyAndShareBtn = document.getElementById('copyAndShareBtn');
+    const shareStep2BackBtn = document.getElementById('shareStep2BackBtn');
+
+    let hasSavedOrCopied = false;
 
     // Default Canvas Dimensions
     const CANVAS_WIDTH = 900;
@@ -909,6 +915,32 @@ document.addEventListener('DOMContentLoaded', () => {
         return canvas.toDataURL('image/png');
     }
 
+    // Record saved/copied state on image preview right-click or long press
+    if (shareImagePreview) {
+        shareImagePreview.addEventListener('contextmenu', () => {
+            hasSavedOrCopied = true;
+        });
+
+        let pressTimer = null;
+        const startPress = () => {
+            pressTimer = setTimeout(() => {
+                hasSavedOrCopied = true;
+            }, 400);
+        };
+        const cancelPress = () => {
+            if (pressTimer) {
+                clearTimeout(pressTimer);
+                pressTimer = null;
+            }
+        };
+        shareImagePreview.addEventListener('touchstart', startPress, { passive: true });
+        shareImagePreview.addEventListener('touchend', cancelPress, { passive: true });
+        shareImagePreview.addEventListener('touchcancel', cancelPress, { passive: true });
+        shareImagePreview.addEventListener('pointerdown', startPress);
+        shareImagePreview.addEventListener('pointerup', cancelPress);
+        shareImagePreview.addEventListener('pointercancel', cancelPress);
+    }
+
     generateBtn.addEventListener('click', () => {
         if (isNgWordDetected) {
             showToast('使用できないキーワードが含まれています');
@@ -916,6 +948,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const dataUrl = getGeneratedDataURL();
         shareImagePreview.src = dataUrl;
+
+        // Reset saved/copied flag and switch back to step 1
+        hasSavedOrCopied = false;
+        if (shareStep1) shareStep1.style.display = '';
+        if (shareStep2) shareStep2.style.display = 'none';
 
         // Twitter Intent Link Setup
         const text = encodeURIComponent(`「超回復 ${state.textKeyword || '温泉'}パワー発動!」画像を作成しました！\n#なんでも超回復メーカー #ウマ娘`);
@@ -925,6 +962,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     downloadModalBtn.addEventListener('click', () => {
+        hasSavedOrCopied = true;
         const dataUrl = getGeneratedDataURL();
         const a = document.createElement('a');
         a.href = dataUrl;
@@ -934,6 +972,50 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.removeChild(a);
         showToast('画像を保存しました');
     });
+
+    twitterShareBtn.addEventListener('click', (e) => {
+        if (!hasSavedOrCopied) {
+            e.preventDefault();
+            if (shareStep1) shareStep1.style.display = 'none';
+            if (shareStep2) shareStep2.style.display = '';
+        }
+    });
+
+    if (copyAndShareBtn) {
+        copyAndShareBtn.addEventListener('click', async () => {
+            hasSavedOrCopied = true;
+            const twitterUrl = twitterShareBtn.href;
+            try {
+                canvas.toBlob(async (blob) => {
+                    if (blob && navigator.clipboard && navigator.clipboard.write) {
+                        try {
+                            const item = new ClipboardItem({ 'image/png': blob });
+                            await navigator.clipboard.write([item]);
+                            showToast('画像をクリップボードにコピーしました');
+                        } catch (err) {
+                            showToast('コピーに失敗しました');
+                        }
+                    } else {
+                        showToast('お使いの環境ではコピーに対応していません');
+                    }
+                    if (twitterUrl) {
+                        window.open(twitterUrl, '_blank', 'noopener,noreferrer');
+                    }
+                });
+            } catch (err) {
+                if (twitterUrl) {
+                    window.open(twitterUrl, '_blank', 'noopener,noreferrer');
+                }
+            }
+        });
+    }
+
+    if (shareStep2BackBtn) {
+        shareStep2BackBtn.addEventListener('click', () => {
+            if (shareStep2) shareStep2.style.display = 'none';
+            if (shareStep1) shareStep1.style.display = '';
+        });
+    }
 
     copyBtn.addEventListener('click', async () => {
         if (isNgWordDetected) {
@@ -948,6 +1030,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 const item = new ClipboardItem({ 'image/png': blob });
                 await navigator.clipboard.write([item]);
+                hasSavedOrCopied = true;
                 showToast('画像をクリップボードにコピーしました');
             });
         } catch (err) {
