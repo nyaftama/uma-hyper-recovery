@@ -117,7 +117,7 @@ h1.main-title {
     display: flex;
     align-items: center;
     gap: 8px;
-    border-bottom: 2px solid var(--primary-light);
+    border-bottom: 2px solid #ccc;
     padding-bottom: 8px;
 }
 
@@ -166,6 +166,31 @@ h1.main-title {
 
 .file-input {
     display: none;
+}
+
+.dropzone-privacy-note {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-align: center;
+    margin: 10px 0 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.dropzone-privacy-note .privacy-icon {
+    flex-shrink: 0;
+    color: var(--primary-color);
+}
+
+.dropzone-controls {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
 .sample-bar {
@@ -343,6 +368,148 @@ details.advanced-settings summary {
     height: 18px;
     accent-color: var(--primary-color);
     cursor: pointer;
+}
+
+/* Canvas Toolbar & Rotate Controls */
+.canvas-toolbar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    width: 100%;
+}
+
+.drag-target-selector {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.rotate-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+@media (min-width: 600px) {
+    .canvas-toolbar {
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 12px 20px;
+    }
+}
+
+.drag-target-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-color);
+}
+
+.radio-group {
+    display: inline-flex;
+    gap: 0;
+}
+
+.radio-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: var(--card-bg);
+    border: 1px solid #ccc;
+    border-radius: 0;
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #444;
+    transition: var(--transition);
+    position: relative;
+}
+
+.radio-option:first-child {
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+}
+
+.radio-option:last-child {
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+.radio-option+.radio-option {
+    margin-left: -1px;
+}
+
+.radio-option:hover,
+.radio-option:has(input[type="radio"]:checked) {
+    z-index: 1;
+}
+
+.radio-option:hover {
+    border-color: var(--primary-color);
+    background: #f5f5f5;
+    transition: var(--border-color) 0s;
+}
+
+.radio-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.radio-custom {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 50%;
+    background: var(--card-bg);
+    display: inline-block;
+    position: relative;
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+.radio-custom::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    transition: transform 0.15s ease-in-out;
+}
+
+.radio-option input[type="radio"]:checked+.radio-custom {
+    border-color: var(--primary-color);
+}
+
+.radio-option input[type="radio"]:checked+.radio-custom::after {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.radio-option input[type="radio"]:checked~.radio-text {
+    color: var(--primary-color);
+}
+
+.radio-option:has(input[type="radio"]:checked) {
+    background: var(--primary-light);
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 6px rgba(46, 125, 50, 0.12);
+}
+
+.radio-option input[type="radio"]:focus-visible+.radio-custom {
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.25);
 }
 
 /* Preview Canvas Area */

@@ -46,7 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const dropzone = document.getElementById('dropzone');
     const fileInput = document.getElementById('fileInput');
     const pasteImgBtn = document.getElementById('pasteImgBtn');
-    const rotateImgBtn = document.getElementById('rotateImgBtn');
+    const rotateImgLeftBtn = document.getElementById('rotateImgLeftBtn');
+    const rotateImgRightBtn = document.getElementById('rotateImgRightBtn');
     const resetImgBtn = document.getElementById('resetImgBtn');
 
     const textKeywordInput = document.getElementById('textKeyword');
@@ -362,28 +363,87 @@ document.addEventListener('DOMContentLoaded', () => {
             drawTextLayers(line2FullText, sharedFont, 0, line2Y, sharedFontSize, line2GradStops);
         }
 
+        textCacheCtx.restore();
+
+        function drawSparkleShape(c) {
+            const r = 4;
+            c.beginPath();
+            c.moveTo(0.00, -10.00);
+            c.arcTo(1.06, -1.06, 10.00, 0.00, r);
+            c.lineTo(10.00, 0.00);
+            c.arcTo(1.06, 1.06, 0.00, 10.00, r);
+            c.lineTo(0.00, 10.00);
+            c.arcTo(-1.06, 1.06, -10.00, 0.00, r);
+            c.lineTo(-10.00, 0.00);
+            c.arcTo(-1.06, -1.06, 0.00, -10.00, r);
+            c.closePath();
+        }
+
         const scaleFactor = baseSize / 80;
         state.sparkles.forEach(sparkle => {
+            const sparkleX = centerX + sparkle.x * scaleFactor;
+            const sparkleY = centerY + sparkle.y * scaleFactor;
+            const effectiveSize = sparkle.size * scaleFactor;
+            const scale = effectiveSize / 20;
+
             textCacheCtx.save();
-            textCacheCtx.translate(sparkle.x * scaleFactor, sparkle.y * scaleFactor);
-            textCacheCtx.scale(0.8, 1.0);
-            textCacheCtx.rotate((sparkle.rot * Math.PI) / 180);
+            textCacheCtx.translate(sparkleX, sparkleY);
 
-            const fontPx = Math.round(sparkle.size * scaleFactor);
-            textCacheCtx.font = `${fontPx}px sans-serif`;
-            textCacheCtx.textAlign = 'center';
-            textCacheCtx.textBaseline = 'middle';
+            const shadowPasses = [
+                { r: effectiveSize * 0.20, strokeW: effectiveSize * 0.28, alpha: 0.015 },
+                { r: effectiveSize * 0.14, strokeW: effectiveSize * 0.20, alpha: 0.03 },
+                { r: effectiveSize * 0.09, strokeW: effectiveSize * 0.14, alpha: 0.05 },
+                { r: effectiveSize * 0.05, strokeW: effectiveSize * 0.09, alpha: 0.08 },
+                { r: effectiveSize * 0.02, strokeW: effectiveSize * 0.05, alpha: 0.12 },
+                { r: 0, strokeW: effectiveSize * 0.03, alpha: 0.20 }
+            ];
 
-            textCacheCtx.fillStyle = 'rgba(254, 223, 77, 0.6)';
-            textCacheCtx.fillText('✦', 1, 1);
-            textCacheCtx.fillText('✦', -1, -1);
+            textCacheCtx.save();
+            textCacheCtx.globalAlpha = 0.5;
+            textCacheCtx.shadowColor = 'rgba(255, 142, 29, 0.5)';
+            textCacheCtx.shadowBlur = effectiveSize * 0.25;
 
+            shadowPasses.forEach(pass => {
+                const passColor = `rgba(255, 142, 29, ${pass.alpha})`;
+                textCacheCtx.strokeStyle = passColor;
+                textCacheCtx.fillStyle = passColor;
+                textCacheCtx.lineWidth = pass.strokeW;
+                textCacheCtx.lineJoin = 'round';
+
+                if (pass.r === 0) {
+                    textCacheCtx.save();
+                    textCacheCtx.scale(scale, scale);
+                    drawSparkleShape(textCacheCtx);
+                    textCacheCtx.stroke();
+                    textCacheCtx.fill();
+                    textCacheCtx.restore();
+                } else {
+                    const angles = 8;
+                    for (let i = 0; i < angles; i++) {
+                        const angle = (i * Math.PI * 2) / angles;
+                        const dx = Math.cos(angle) * pass.r;
+                        const dy = Math.sin(angle) * pass.r;
+                        textCacheCtx.save();
+                        textCacheCtx.translate(dx, dy);
+                        textCacheCtx.scale(scale, scale);
+                        drawSparkleShape(textCacheCtx);
+                        textCacheCtx.stroke();
+                        textCacheCtx.fill();
+                        textCacheCtx.restore();
+                    }
+                }
+            });
+            textCacheCtx.restore();
+
+            textCacheCtx.save();
+            textCacheCtx.scale(scale, scale);
+            drawSparkleShape(textCacheCtx);
             textCacheCtx.fillStyle = '#ffffff';
-            textCacheCtx.fillText('✦', 0, 0);
+            textCacheCtx.fill();
+            textCacheCtx.restore();
+
             textCacheCtx.restore();
         });
-
-        textCacheCtx.restore();
     }
 
     // --- Clamp Image Position (Prevent gaps when scale >= 100%) ---
@@ -702,9 +762,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Rotate Image Button (Rotate 90 degrees clockwise)
-    if (rotateImgBtn) {
-        rotateImgBtn.addEventListener('click', () => {
+    // Rotate Image Left Button (Rotate 90 degrees counter-clockwise)
+    if (rotateImgLeftBtn) {
+        rotateImgLeftBtn.addEventListener('click', () => {
+            if (!state.bgImage) {
+                showToast('回転する画像が選択されていません');
+                return;
+            }
+            state.imgRotation = (state.imgRotation + 270) % 360;
+            renderCanvas();
+            showToast(`画像を ${state.imgRotation}° 回転しました`);
+        });
+    }
+
+    // Rotate Image Right Button (Rotate 90 degrees clockwise)
+    if (rotateImgRightBtn) {
+        rotateImgRightBtn.addEventListener('click', () => {
             if (!state.bgImage) {
                 showToast('回転する画像が選択されていません');
                 return;
