@@ -30,7 +30,7 @@
     <!-- HEIC / HEIF Image Converter -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=0.94b">
+    <link rel="stylesheet" href="css/style.css?v=0.94c">
 </head>
 
 <body>
@@ -38,7 +38,7 @@
     <div class="container">
         <!-- Header Meta -->
         <div class="header-meta">
-            <span class="version-badge">v0.94b</span>
+            <span class="version-badge">v0.94c</span>
             <a href="https://nyaftama.github.io/" target="_blank" rel="noopener noreferrer" class="credit-link">
                 作った人: <strong>@nyaftama</strong>
             </a>
@@ -265,17 +265,24 @@
 
             <!-- Step 2: Warning View when image is not saved/copied -->
             <div id="shareStep2" style="display: none;">
-                <h3 class="modal-title">画像が保存またはコピーされていないようです</h3>
+                <h3 class="modal-title">画像が保存またはコピー<br>されていないようです</h3>
                 <p class="modal-desc">
                     画像が保存されていない場合、X（Twitter）に画像を添付できません。<br>
                     画像をクリップボードにコピーしてからXを開くか、前の画面に戻って画像を保存してください。
                 </p>
 
-                <div class="modal-actions" style="margin-top: 15px;">
-                    <button type="button" id="copyAndShareBtn" class="btn btn-twitter">
-                        コピーしてXを開く
+                <div class="modal-actions">
+                    <button type="button" id="copyImageBtn" class="btn btn-primary">
+                        画像をコピー
                     </button>
-                    <button type="button" id="shareStep2BackBtn" class="btn btn-secondary">
+                    <a id="shareStep2TwitterBtn" class="btn btn-twitter" href="#" target="_blank"
+                        rel="noopener noreferrer">
+                        Xを開く
+                    </a>
+                </div>
+
+                <div class="modal-actions-secondary">
+                    <button type="button" id="shareStep2BackBtn" class="btn btn-secondary" style="width: 100%;">
                         戻る
                     </button>
                 </div>
@@ -286,7 +293,7 @@
     <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
 
-    <script src="js/app.js?v=0.94b" defer></script>
+    <script src="js/app.js?v=0.94c" defer></script>
 </body>
 
 </html>

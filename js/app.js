@@ -181,7 +181,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const downloadModalBtn = document.getElementById('downloadModalBtn');
     const twitterShareBtn = document.getElementById('twitterShareBtn');
     const closeModalBtn = document.getElementById('closeModalBtn');
-    const copyAndShareBtn = document.getElementById('copyAndShareBtn');
+    const copyImageBtn = document.getElementById('copyImageBtn');
+    const shareStep2TwitterBtn = document.getElementById('shareStep2TwitterBtn');
     const shareStep2BackBtn = document.getElementById('shareStep2BackBtn');
 
     let hasSavedOrCopied = false;
@@ -955,7 +956,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Twitter Intent Link Setup
         const text = encodeURIComponent(`「超回復 ${state.textKeyword || '温泉'}パワー発動!」画像を作成しました！\n#なんでも超回復メーカー #ウマ娘`);
-        twitterShareBtn.href = `https://twitter.com/intent/tweet?text=${text}`;
+        const twitterUrl = `https://twitter.com/intent/tweet?text=${text}`;
+        twitterShareBtn.href = twitterUrl;
+        if (shareStep2TwitterBtn) shareStep2TwitterBtn.href = twitterUrl;
 
         shareModal.classList.add('active');
     });
@@ -980,32 +983,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    if (copyAndShareBtn) {
-        copyAndShareBtn.addEventListener('click', async () => {
+    if (copyImageBtn) {
+        copyImageBtn.addEventListener('click', async () => {
             hasSavedOrCopied = true;
-            const twitterUrl = twitterShareBtn.href;
+            if (!navigator.clipboard || !navigator.clipboard.write) {
+                showToast('お使いの環境ではコピーに対応していません');
+                return;
+            }
             try {
                 canvas.toBlob(async (blob) => {
-                    if (blob && navigator.clipboard && navigator.clipboard.write) {
+                    if (blob) {
                         try {
                             const item = new ClipboardItem({ 'image/png': blob });
                             await navigator.clipboard.write([item]);
                             showToast('画像をクリップボードにコピーしました');
                         } catch (err) {
+                            console.error(err);
                             showToast('コピーに失敗しました');
                         }
                     } else {
-                        showToast('お使いの環境ではコピーに対応していません');
-                    }
-                    if (twitterUrl) {
-                        window.open(twitterUrl, '_blank', 'noopener,noreferrer');
+                        showToast('画像の生成に失敗しました');
                     }
                 });
             } catch (err) {
-                if (twitterUrl) {
-                    window.open(twitterUrl, '_blank', 'noopener,noreferrer');
-                }
+                console.error(err);
+                showToast('コピーに失敗しました');
             }
+        });
+    }
+
+    if (shareStep2TwitterBtn) {
+        shareStep2TwitterBtn.addEventListener('click', () => {
+            hasSavedOrCopied = true;
         });
     }
 
