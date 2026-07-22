@@ -919,8 +919,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Twitter Intent Link Setup
         const text = encodeURIComponent(`「超回復 ${state.textKeyword || '温泉'}パワー発動!」画像を作成しました！\n#なんでも超回復メーカー #ウマ娘`);
-        const url = encodeURIComponent(window.location.href);
-        twitterShareBtn.href = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+        twitterShareBtn.href = `https://twitter.com/intent/tweet?text=${text}`;
 
         shareModal.classList.add('active');
     });
