@@ -30,7 +30,7 @@
     <!-- HEIC / HEIF Image Converter -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=0.94c">
+    <link rel="stylesheet" href="css/style.css?v=1.00">
 </head>
 
 <body>
@@ -38,7 +38,7 @@
     <div class="container">
         <!-- Header Meta -->
         <div class="header-meta">
-            <span class="version-badge">v0.94c</span>
+            <span class="version-badge">v1.00</span>
             <a href="https://nyaftama.github.io/" target="_blank" rel="noopener noreferrer" class="credit-link">
                 作った人: <strong>@nyaftama</strong>
             </a>
@@ -80,10 +80,10 @@
 
             <div class="dropzone-controls">
                 <button type="button" id="pasteImgBtn" class="btn btn-secondary btn-small">
-                    コピーした画像を貼り付け
+                    画像を貼り付け
                 </button>
                 <button type="button" id="resetImgBtn" class="btn btn-secondary btn-small">
-                    リセット
+                    画像をリセット
                 </button>
             </div>
 
@@ -92,7 +92,11 @@
             <!-- Text Keyword Input (Line 2) -->
             <div class="form-group">
                 <label for="textKeyword" class="form-label">発動キーワード（「超回復 ○○パワー発動!」）</label>
-                <input type="text" id="textKeyword" class="input-text" value="温泉" placeholder="例: 温泉">
+                <div class="keyword-input-wrapper">
+                    <input type="text" id="textKeyword" class="input-text" value="温泉" placeholder="例: 温泉"
+                        maxlength="20">
+                    <button type="button" id="redrawBtn" class="btn btn-secondary btn-small">再描画</button>
+                </div>
                 <div id="textKeywordError" class="input-error-msg" style="display: none;">
                     <svg class="error-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"
                         style="vertical-align: middle; margin-right: 4px;">
@@ -127,6 +131,83 @@
 
             <!-- Canvas Toolbar Controls -->
             <div class="canvas-toolbar">
+                <div class="aspect-ratio-selector">
+                    <div class="custom-dropdown" id="aspectDropdown">
+                        <button type="button" class="dropdown-trigger" id="aspectDropdownTrigger"
+                            aria-haspopup="listbox" aria-expanded="false" title="アスペクト比の変更">
+                            <span class="dropdown-selected-icon" id="aspectSelectedIcon">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="6" width="18" height="12" rx="2" />
+                                </svg>
+                            </span>
+                            <span class="dropdown-selected-text" id="aspectSelectedText">3:2 (横長)</span>
+                            <svg class="dropdown-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M6 9l6 6 6-6" />
+                            </svg>
+                        </button>
+                        <div class="dropdown-menu" id="aspectDropdownMenu" role="listbox">
+                            <button type="button" class="dropdown-item" data-aspect="16:9" role="option"
+                                aria-selected="false">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="2" y="7.5" width="20" height="9" rx="2" />
+                                </svg>
+                                <span>16:9 (横長)</span>
+                            </button>
+                            <button type="button" class="dropdown-item active" data-aspect="3:2" role="option"
+                                aria-selected="true">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="6" width="18" height="12" rx="2" />
+                                </svg>
+                                <span>3:2 (横長)</span>
+                            </button>
+                            <button type="button" class="dropdown-item" data-aspect="4:3" role="option"
+                                aria-selected="false">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3.5" y="5.5" width="17" height="13" rx="2" />
+                                </svg>
+                                <span>4:3 (横長)</span>
+                            </button>
+                            <button type="button" class="dropdown-item" data-aspect="1:1" role="option"
+                                aria-selected="false">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="4" y="4" width="16" height="16" rx="2" />
+                                </svg>
+                                <span>1:1 (正方形)</span>
+                            </button>
+                            <button type="button" class="dropdown-item" data-aspect="3:4" role="option"
+                                aria-selected="false">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="5.5" y="3.5" width="13" height="17" rx="2" />
+                                </svg>
+                                <span>3:4 (縦長)</span>
+                            </button>
+                            <button type="button" class="dropdown-item" data-aspect="2:3" role="option"
+                                aria-selected="false">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="6" y="3" width="12" height="18" rx="2" />
+                                </svg>
+                                <span>2:3 (縦長)</span>
+                            </button>
+                            <button type="button" class="dropdown-item" data-aspect="9:16" role="option"
+                                aria-selected="false">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="7.5" y="2" width="9" height="20" rx="2" />
+                                </svg>
+                                <span>9:16 (縦長)</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="drag-target-selector">
                     <div class="radio-group">
                         <label class="radio-option">
@@ -173,7 +254,7 @@
                     キラキラをシャッフル
                 </button>
                 <button type="button" id="resetBtn" class="btn btn-secondary btn-small">
-                    初期位置にリセット
+                    設定をリセット
                 </button>
             </div>
 
@@ -293,7 +374,7 @@
     <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
 
-    <script src="js/app.js?v=0.94c" defer></script>
+    <script src="js/app.js?v=1.00" defer></script>
 </body>
 
 </html>

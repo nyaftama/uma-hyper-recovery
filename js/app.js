@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
         textKeyword: '温泉',
         textSize: 70,  // default 70
         textSlant: -8, // Fixed -8 deg slant
+        aspectRatio: '3:2', // default 3:2
         posX: 50, // percentage 0 - 100
         posY: 75, // default 75%
         imgX: 0,  // percentage offset
@@ -42,6 +43,17 @@ document.addEventListener('DOMContentLoaded', () => {
         dragStart: { x: 0, y: 0 }
     };
 
+    // Aspect Ratio Definitions (Pattern A: short-side 600px based)
+    const ASPECT_RATIOS = {
+        '3:2':  { width: 900,  height: 600,  label: '3:2 (横長)' },
+        '16:9': { width: 1067, height: 600,  label: '16:9 (横長)' },
+        '4:3':  { width: 800,  height: 600,  label: '4:3 (横長)' },
+        '1:1':  { width: 600,  height: 600,  label: '1:1 (正方形)' },
+        '3:4':  { width: 600,  height: 800,  label: '3:4 (縦長)' },
+        '2:3':  { width: 600,  height: 900,  label: '2:3 (縦長)' },
+        '9:16': { width: 600,  height: 1067, label: '9:16 (縦長)' }
+    };
+
     // DOM Elements
     const dropzone = document.getElementById('dropzone');
     const fileInput = document.getElementById('fileInput');
@@ -49,6 +61,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const rotateImgLeftBtn = document.getElementById('rotateImgLeftBtn');
     const rotateImgRightBtn = document.getElementById('rotateImgRightBtn');
     const resetImgBtn = document.getElementById('resetImgBtn');
+
+    const aspectDropdown = document.getElementById('aspectDropdown');
+    const aspectDropdownTrigger = document.getElementById('aspectDropdownTrigger');
+    const aspectSelectedIcon = document.getElementById('aspectSelectedIcon');
+    const aspectSelectedText = document.getElementById('aspectSelectedText');
+    const aspectDropdownMenu = document.getElementById('aspectDropdownMenu');
 
     const textKeywordInput = document.getElementById('textKeyword');
     const textKeywordError = document.getElementById('textKeywordError');
@@ -71,7 +89,12 @@ document.addEventListener('DOMContentLoaded', () => {
         'ヤオチョウ', 'キョニュウ', 'テコキ', 'ホンバン', 'フウゾク', 'ナカダシ', 'シオフキ',
         'セイエキ', 'セイシ', 'ショジョ', 'ドウテイ', 'いんむ', 'やじゅう', 'せんぱい',
         'たどころ', 'とおの', 'いきそう', 'よごふりょう', 'やおちょう', 'きょにゅう', 'てこき',
-        'ほんばん', 'ふうぞく', 'なかだし', 'しおふき', 'せいえき', 'せいし', 'しょじょ', 'どうてい'
+        'ほんばん', 'ふうぞく', 'なかだし', 'しおふき', 'せいえき', 'せいし', 'しょじょ', 'どうてい',
+        'fuck', 'fucking', 'fucker', 'shit', 'bitch', 'slut', 'whore', 'bastard', 'asshole',
+        'cunt', 'dick', 'pussy', 'cock', 'penis', 'vagina', 'boobs', 'milf', 'dildo',
+        'porn', 'porno', 'hentai', 'sex', 'sexy', 'nude', 'naked', 'anal', 'orgasm',
+        'cum', 'masturbate', 'erotic', 'kill', 'murder', 'suicide', 'death', 'terrorist',
+        'nazi', 'nigger', 'nigga', 'faggot', 'retard'
     ];
 
     async function loadNgWords() {
@@ -129,27 +152,55 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function hasEmoji(str) {
+        if (!str) return false;
+        try {
+            if (/\p{Extended_Pictographic}/u.test(str)) {
+                return true;
+            }
+        } catch (e) {}
+
+        const emojiRegex = /[\u{1F300}-\u{1F9FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}\u{2300}-\u{23FF}]/u;
+        return emojiRegex.test(str);
+    }
+
     function validateKeywordInput() {
         const text = textKeywordInput ? textKeywordInput.value : '';
-        let matched = false;
+        let matchedNg = false;
+        let matchedEmoji = false;
 
-        if (ngWords.length > 0 && text && text.trim().length > 0) {
-            const normalizedText = normalizeText(text);
-            for (const word of ngWords) {
-                const normalizedWord = normalizeText(word);
-                if (normalizedWord && normalizedText.includes(normalizedWord)) {
-                    matched = true;
-                    break;
+        if (text && text.trim().length > 0) {
+            matchedEmoji = hasEmoji(text);
+
+            if (!matchedEmoji && ngWords.length > 0) {
+                const normalizedText = normalizeText(text);
+                for (const word of ngWords) {
+                    const normalizedWord = normalizeText(word);
+                    if (normalizedWord && normalizedText.includes(normalizedWord)) {
+                        matchedNg = true;
+                        break;
+                    }
                 }
             }
         }
 
-        isNgWordDetected = matched;
+        const isError = matchedEmoji || matchedNg;
+        isNgWordDetected = isError;
 
         if (textKeywordInput) {
-            if (matched) {
+            const errorSpan = textKeywordError ? textKeywordError.querySelector('span') : null;
+            if (isError) {
                 textKeywordInput.classList.add('input-error');
-                if (textKeywordError) textKeywordError.style.display = 'flex';
+                if (textKeywordError) {
+                    textKeywordError.style.display = 'flex';
+                    if (errorSpan) {
+                        if (matchedEmoji) {
+                            errorSpan.textContent = '絵文字は使用できません';
+                        } else {
+                            errorSpan.textContent = '使用できないキーワードが含まれています';
+                        }
+                    }
+                }
             } else {
                 textKeywordInput.classList.remove('input-error');
                 if (textKeywordError) textKeywordError.style.display = 'none';
@@ -157,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         renderCanvasSafe(50);
-        return matched;
+        return isError;
     }
 
     const textSizeInput = document.getElementById('textSize');
@@ -190,6 +241,73 @@ document.addEventListener('DOMContentLoaded', () => {
     // Default Canvas Dimensions
     const CANVAS_WIDTH = 900;
     const CANVAS_HEIGHT = 600;
+
+    function updateCanvasDimensions(aspectKey) {
+        const config = ASPECT_RATIOS[aspectKey] || ASPECT_RATIOS['3:2'];
+        state.aspectRatio = aspectKey;
+
+        canvas.width = config.width;
+        canvas.height = config.height;
+
+        textCacheCanvas.width = config.width;
+        textCacheCanvas.height = config.height;
+
+        markTextCacheDirty();
+    }
+
+    // Aspect Ratio Dropdown Interaction
+    if (aspectDropdownTrigger && aspectDropdown) {
+        aspectDropdownTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = aspectDropdown.classList.contains('open');
+            if (isOpen) {
+                aspectDropdown.classList.remove('open');
+                aspectDropdownTrigger.setAttribute('aria-expanded', 'false');
+            } else {
+                aspectDropdown.classList.add('open');
+                aspectDropdownTrigger.setAttribute('aria-expanded', 'true');
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!aspectDropdown.contains(e.target)) {
+                aspectDropdown.classList.remove('open');
+                aspectDropdownTrigger.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        if (aspectDropdownMenu) {
+            const items = aspectDropdownMenu.querySelectorAll('.dropdown-item');
+            items.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const chosenAspect = item.getAttribute('data-aspect');
+                    if (chosenAspect && ASPECT_RATIOS[chosenAspect]) {
+                        items.forEach(i => {
+                            i.classList.remove('active');
+                            i.setAttribute('aria-selected', 'false');
+                        });
+                        item.classList.add('active');
+                        item.setAttribute('aria-selected', 'true');
+
+                        const itemSvg = item.querySelector('svg');
+                        const itemSpan = item.querySelector('span');
+                        if (itemSvg && aspectSelectedIcon) {
+                            aspectSelectedIcon.innerHTML = itemSvg.outerHTML;
+                        }
+                        if (itemSpan && aspectSelectedText) {
+                            aspectSelectedText.textContent = itemSpan.textContent;
+                        }
+
+                        aspectDropdown.classList.remove('open');
+                        aspectDropdownTrigger.setAttribute('aria-expanded', 'false');
+                        updateCanvasDimensions(chosenAspect);
+                        renderCanvasSafe(0);
+                    }
+                });
+            });
+        }
+    }
 
     // --- Toast Notification (Matched exactly with uma-ouen-baken) ---
     let toastTimeout;
@@ -246,6 +364,33 @@ document.addEventListener('DOMContentLoaded', () => {
         const line1Text = '超回復';
         const line2FullText = `${state.textKeyword || ''}パワー発動!`;
 
+        const fontStack = "'Noto Sans JP', -apple-system, sans-serif";
+
+        // Fit Text calculation (Prevent text from overflowing canvas boundary)
+        textCacheCtx.font = `900 ${baseSize}px ${fontStack}`;
+        const line1Width = textCacheCtx.measureText(line1Text).width;
+        let line2Width = textCacheCtx.measureText(line2FullText).width;
+        if (line2FullText.endsWith('！') || line2FullText.endsWith('!')) {
+            const l2Main = line2FullText.slice(0, -1);
+            const mw = textCacheCtx.measureText(l2Main).width;
+            const ew = textCacheCtx.measureText('!').width * 1.1;
+            line2Width = mw + ew;
+        }
+
+        const slantFactor = 1.05;
+        const maxTextWidth = Math.max(line1Width, line2Width) * slantFactor;
+        const maxAllowedWidth = textCacheCanvas.width * 0.88;
+
+        let fitScale = 1.0;
+        if (maxTextWidth > maxAllowedWidth) {
+            fitScale = maxAllowedWidth / maxTextWidth;
+        }
+
+        const sharedFontSize = baseSize * fitScale;
+        const line1Y = -sharedFontSize * 0.6;
+        const line2Y = sharedFontSize * 0.6;
+        const sharedFont = `900 ${sharedFontSize}px ${fontStack}`;
+
         textCacheCtx.save();
         textCacheCtx.translate(centerX, centerY);
 
@@ -254,12 +399,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         textCacheCtx.textAlign = 'center';
         textCacheCtx.textBaseline = 'middle';
-
-        const fontStack = "'Noto Sans JP', -apple-system, sans-serif";
-        const sharedFontSize = baseSize;
-        const line1Y = -sharedFontSize * 0.6;
-        const line2Y = sharedFontSize * 0.6;
-        const sharedFont = `900 ${sharedFontSize}px ${fontStack}`;
 
         function drawTextLayers(text, font, xOffset, yOffset, size, gradientStops) {
             textCacheCtx.font = font;
@@ -559,7 +698,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const centerX = (canvas.width * state.posX) / 100;
         const centerY = (canvas.height * state.posY) / 100;
 
-        ctx.drawImage(textCacheCanvas, centerX - CANVAS_WIDTH / 2, centerY - CANVAS_HEIGHT / 2);
+        ctx.drawImage(textCacheCanvas, centerX - textCacheCanvas.width / 2, centerY - textCacheCanvas.height / 2);
     }
 
     // --- Interactive Drag & Drop on Canvas (Text or Image) ---
@@ -824,15 +963,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    const redrawBtn = document.getElementById('redrawBtn');
+    if (redrawBtn) {
+        redrawBtn.addEventListener('click', () => {
+            renderCanvasSafe(0);
+            showToast('キャンバスを再描画しました');
+        });
+    }
+
     // --- Input Control Listeners ---
     textKeywordInput.addEventListener('input', (e) => {
+        if (e.target.value.length > 20) {
+            e.target.value = e.target.value.slice(0, 20);
+        }
         state.textKeyword = e.target.value;
         validateKeywordInput();
     });
 
     presetChips.forEach(chip => {
         chip.addEventListener('click', () => {
-            const presetVal = chip.getAttribute('data-preset');
+            const presetVal = (chip.getAttribute('data-preset') || '').slice(0, 20);
             textKeywordInput.value = presetVal;
             state.textKeyword = presetVal;
             validateKeywordInput();
@@ -905,6 +1055,23 @@ document.addEventListener('DOMContentLoaded', () => {
             imgScaleInput.value = 100;
             imgScaleVal.textContent = '100%';
         }
+
+        // Reset aspect ratio to default 3:2
+        if (aspectDropdownMenu) {
+            const items = aspectDropdownMenu.querySelectorAll('.dropdown-item');
+            items.forEach(i => {
+                const isDefault = i.getAttribute('data-aspect') === '3:2';
+                i.classList.toggle('active', isDefault);
+                i.setAttribute('aria-selected', isDefault ? 'true' : 'false');
+                if (isDefault) {
+                    const itemSvg = i.querySelector('svg');
+                    const itemSpan = i.querySelector('span');
+                    if (itemSvg && aspectSelectedIcon) aspectSelectedIcon.innerHTML = itemSvg.outerHTML;
+                    if (itemSpan && aspectSelectedText) aspectSelectedText.textContent = itemSpan.textContent;
+                }
+            });
+        }
+        updateCanvasDimensions('3:2');
 
         renderCanvasSafe(50);
         showToast('初期位置にリセットしました');
