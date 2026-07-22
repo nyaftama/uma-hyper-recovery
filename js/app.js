@@ -173,7 +173,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const shuffleSparklesBtn = document.getElementById('shuffleSparklesBtn');
     const resetBtn = document.getElementById('resetBtn');
     const generateBtn = document.getElementById('generateBtn');
-    const copyBtn = document.getElementById('copyBtn');
 
     const shareModal = document.getElementById('shareModal');
     const shareStep1 = document.getElementById('shareStep1');
@@ -1016,27 +1015,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (shareStep1) shareStep1.style.display = '';
         });
     }
-
-    copyBtn.addEventListener('click', async () => {
-        if (isNgWordDetected) {
-            showToast('使用できないキーワードが含まれています');
-            return;
-        }
-        try {
-            canvas.toBlob(async (blob) => {
-                if (!blob) {
-                    showToast('画像の生成に失敗しました');
-                    return;
-                }
-                const item = new ClipboardItem({ 'image/png': blob });
-                await navigator.clipboard.write([item]);
-                hasSavedOrCopied = true;
-                showToast('画像をクリップボードにコピーしました');
-            });
-        } catch (err) {
-            showToast('コピーに失敗しました（ブラウザ非対応）');
-        }
-    });
 
     closeModalBtn.addEventListener('click', () => {
         shareModal.classList.remove('active');
