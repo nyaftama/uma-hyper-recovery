@@ -30,7 +30,7 @@
     <!-- HEIC / HEIF Image Converter -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=1.00">
+    <link rel="stylesheet" href="css/style.css?v=1.01">
 </head>
 
 <body>
@@ -38,7 +38,10 @@
     <div class="container">
         <!-- Header Meta -->
         <div class="header-meta">
-            <span class="version-badge">v1.00</span>
+            <div class="version-group">
+                <span class="version-badge">v1.01</span>
+                <a href="https://github.com/nyaftama/uma-hyper-recovery#%E6%9B%B4%E6%96%B0%E5%B1%A5%E6%AD%B4" target="_blank" rel="noopener noreferrer" class="changelog-link">更新履歴</a>
+            </div>
             <a href="https://nyaftama.github.io/" target="_blank" rel="noopener noreferrer" class="credit-link">
                 作った人: <strong>@nyaftama</strong>
             </a>
@@ -92,7 +95,13 @@
             <!-- Text Keyword Input (Line 2) -->
             <div class="form-group">
                 <label for="textKeyword" class="form-label">発動キーワード（「超回復 ○○パワー発動!」）</label>
-                <div class="keyword-input-wrapper">
+                <div class="only-hyper-recovery-wrapper">
+                    <label class="toggle-wrapper">
+                        <input type="checkbox" id="onlyHyperRecoveryCheckbox">
+                        <span>超回復可能!</span>
+                    </label>
+                </div>
+                <div class="keyword-input-wrapper" id="keywordInputGroup">
                     <input type="text" id="textKeyword" class="input-text" value="温泉" placeholder="例: 温泉"
                         maxlength="20">
                     <button type="button" id="redrawBtn" class="btn btn-secondary btn-small">再描画</button>
@@ -211,12 +220,12 @@
                 <div class="drag-target-selector">
                     <div class="radio-group">
                         <label class="radio-option">
-                            <input type="radio" name="dragTarget" value="text" checked>
+                            <input type="radio" name="dragTarget" value="text">
                             <span class="radio-custom"></span>
                             <span class="radio-text">文字を移動</span>
                         </label>
                         <label class="radio-option">
-                            <input type="radio" name="dragTarget" value="image">
+                            <input type="radio" name="dragTarget" value="image" checked>
                             <span class="radio-custom"></span>
                             <span class="radio-text">画像を移動</span>
                         </label>
@@ -246,6 +255,15 @@
             </div>
 
             <div class="canvas-wrapper">
+                <label class="canvas-lock-toggle" id="canvasLockToggle" title="キャンバスの操作をロック / 解除">
+                    <input type="checkbox" id="canvasLockCheckbox">
+                    <svg class="lock-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    <span>ロック</span>
+                </label>
                 <canvas id="previewCanvas" width="900" height="600"></canvas>
             </div>
 
@@ -374,7 +392,7 @@
     <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
 
-    <script src="js/app.js?v=1.00" defer></script>
+    <script src="js/app.js?v=1.01" defer></script>
 </body>
 
 </html>

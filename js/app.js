@@ -29,6 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
         imgRotation: 0, // 0, 90, 180, 270 degrees
         textLine1: '超回復',
         textKeyword: '温泉',
+        onlyHyperRecovery: false,
+        isCanvasLocked: false,
         textSize: 70,  // default 70
         textSlant: -8, // Fixed -8 deg slant
         aspectRatio: '3:2', // default 3:2
@@ -37,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         imgX: 0,  // percentage offset
         imgY: 0,  // percentage offset
         imgScale: 100, // percentage
-        dragTarget: 'text', // 'text' or 'image'
+        dragTarget: 'image', // default 'image'
         sparkles: generateRandomSparkles(),
         isDragging: false,
         dragStart: { x: 0, y: 0 }
@@ -45,13 +47,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Aspect Ratio Definitions (Pattern A: short-side 600px based)
     const ASPECT_RATIOS = {
-        '3:2':  { width: 900,  height: 600,  label: '3:2 (横長)' },
-        '16:9': { width: 1067, height: 600,  label: '16:9 (横長)' },
-        '4:3':  { width: 800,  height: 600,  label: '4:3 (横長)' },
-        '1:1':  { width: 600,  height: 600,  label: '1:1 (正方形)' },
-        '3:4':  { width: 600,  height: 800,  label: '3:4 (縦長)' },
-        '2:3':  { width: 600,  height: 900,  label: '2:3 (縦長)' },
-        '9:16': { width: 600,  height: 1067, label: '9:16 (縦長)' }
+        '3:2': { width: 900, height: 600, label: '3:2 (横長)' },
+        '16:9': { width: 1067, height: 600, label: '16:9 (横長)' },
+        '4:3': { width: 800, height: 600, label: '4:3 (横長)' },
+        '1:1': { width: 600, height: 600, label: '1:1 (正方形)' },
+        '3:4': { width: 600, height: 800, label: '3:4 (縦長)' },
+        '2:3': { width: 600, height: 900, label: '2:3 (縦長)' },
+        '9:16': { width: 600, height: 1067, label: '9:16 (縦長)' }
     };
 
     // DOM Elements
@@ -71,6 +73,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const textKeywordInput = document.getElementById('textKeyword');
     const textKeywordError = document.getElementById('textKeywordError');
     const presetChips = document.querySelectorAll('.preset-chip');
+    const onlyHyperRecoveryCheckbox = document.getElementById('onlyHyperRecoveryCheckbox');
+    const keywordInputGroup = document.getElementById('keywordInputGroup');
+    const presetsWrapper = document.querySelector('.presets-wrapper');
+
+    const canvasLockCheckbox = document.getElementById('canvasLockCheckbox');
+    const canvasLockToggle = document.getElementById('canvasLockToggle');
+    const canvasCard = document.querySelector('.canvas-card');
 
     // NG Words Filter State & Loader
     let ngWords = [];
@@ -158,13 +167,23 @@ document.addEventListener('DOMContentLoaded', () => {
             if (/\p{Extended_Pictographic}/u.test(str)) {
                 return true;
             }
-        } catch (e) {}
+        } catch (e) { }
 
         const emojiRegex = /[\u{1F300}-\u{1F9FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}\u{2300}-\u{23FF}]/u;
         return emojiRegex.test(str);
     }
 
     function validateKeywordInput() {
+        if (state.onlyHyperRecovery) {
+            isNgWordDetected = false;
+            if (textKeywordInput) {
+                textKeywordInput.classList.remove('input-error');
+                if (textKeywordError) textKeywordError.style.display = 'none';
+            }
+            renderCanvasSafe(50);
+            return false;
+        }
+
         const text = textKeywordInput ? textKeywordInput.value : '';
         let matchedNg = false;
         let matchedEmoji = false;
@@ -361,44 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const centerX = textCacheCanvas.width / 2;
         const centerY = textCacheCanvas.height / 2;
         const baseSize = state.textSize;
-        const line1Text = '超回復';
-        const line2FullText = `${state.textKeyword || ''}パワー発動!`;
-
         const fontStack = "'Noto Sans JP', -apple-system, sans-serif";
-
-        // Fit Text calculation (Prevent text from overflowing canvas boundary)
-        textCacheCtx.font = `900 ${baseSize}px ${fontStack}`;
-        const line1Width = textCacheCtx.measureText(line1Text).width;
-        let line2Width = textCacheCtx.measureText(line2FullText).width;
-        if (line2FullText.endsWith('！') || line2FullText.endsWith('!')) {
-            const l2Main = line2FullText.slice(0, -1);
-            const mw = textCacheCtx.measureText(l2Main).width;
-            const ew = textCacheCtx.measureText('!').width * 1.1;
-            line2Width = mw + ew;
-        }
-
-        const slantFactor = 1.05;
-        const maxTextWidth = Math.max(line1Width, line2Width) * slantFactor;
-        const maxAllowedWidth = textCacheCanvas.width * 0.88;
-
-        let fitScale = 1.0;
-        if (maxTextWidth > maxAllowedWidth) {
-            fitScale = maxAllowedWidth / maxTextWidth;
-        }
-
-        const sharedFontSize = baseSize * fitScale;
-        const line1Y = -sharedFontSize * 0.6;
-        const line2Y = sharedFontSize * 0.6;
-        const sharedFont = `900 ${sharedFontSize}px ${fontStack}`;
-
-        textCacheCtx.save();
-        textCacheCtx.translate(centerX, centerY);
-
-        const slantRad = (state.textSlant * Math.PI) / 180;
-        textCacheCtx.transform(1, 0, Math.tan(slantRad), 1, 0, 0);
-
-        textCacheCtx.textAlign = 'center';
-        textCacheCtx.textBaseline = 'middle';
 
         function drawTextLayers(text, font, xOffset, yOffset, size, gradientStops) {
             textCacheCtx.font = font;
@@ -458,6 +440,88 @@ document.addEventListener('DOMContentLoaded', () => {
             textCacheCtx.restore();
         }
 
+        function normalizeExclamation(str) {
+            if (!str) return '';
+            return str.replace(/！/g, '!').replace(/？/g, '?');
+        }
+
+        function parseTextSegments(str) {
+            const normalized = normalizeExclamation(str);
+            const segments = [];
+            let currentNormal = '';
+
+            for (let i = 0; i < normalized.length; i++) {
+                const char = normalized[i];
+                if (char === '!' || char === '?') {
+                    if (currentNormal) {
+                        segments.push({ type: 'normal', text: currentNormal });
+                        currentNormal = '';
+                    }
+                    segments.push({ type: 'special', text: char });
+                } else {
+                    currentNormal += char;
+                }
+            }
+            if (currentNormal) {
+                segments.push({ type: 'normal', text: currentNormal });
+            }
+            return segments;
+        }
+
+        function measureLineWithSpecialChars(str, font) {
+            textCacheCtx.font = font;
+            const segments = parseTextSegments(str);
+            let totalWidth = 0;
+
+            segments.forEach(seg => {
+                if (seg.type === 'normal') {
+                    totalWidth += textCacheCtx.measureText(seg.text).width;
+                } else {
+                    const baseW = textCacheCtx.measureText(seg.text).width;
+                    totalWidth += baseW * 1.1;
+                }
+            });
+
+            return totalWidth;
+        }
+
+        function drawLineWithSpecialChars(str, font, yOffset, size, gradientStops) {
+            textCacheCtx.font = font;
+            const segments = parseTextSegments(str);
+            const totalWidth = measureLineWithSpecialChars(str, font);
+
+            let currentX = -totalWidth / 2;
+
+            segments.forEach(seg => {
+                if (seg.type === 'normal') {
+                    textCacheCtx.font = font;
+                    const w = textCacheCtx.measureText(seg.text).width;
+                    const centerX = currentX + w / 2;
+                    drawTextLayers(seg.text, font, centerX, yOffset, size, gradientStops);
+                    currentX += w;
+                } else {
+                    textCacheCtx.font = font;
+                    const baseW = textCacheCtx.measureText(seg.text).width;
+                    const scaledW = baseW * 1.1;
+                    const centerX = currentX + scaledW / 2;
+
+                    const exclamOffsetX = size * 0.06;
+                    const exclamOffsetY = size * 0.04;
+
+                    textCacheCtx.save();
+                    textCacheCtx.translate(centerX + exclamOffsetX, yOffset + exclamOffsetY);
+                    textCacheCtx.scale(1.1, 1.1);
+                    textCacheCtx.rotate((15 * Math.PI) / 180);
+
+                    drawTextLayers(seg.text, font, 0, 0, size, gradientStops);
+
+                    textCacheCtx.restore();
+
+                    currentX += scaledW;
+                }
+            });
+        }
+
         const line1GradStops = [
             { offset: 0.0, color: '#FFFDDC' },
             { offset: 0.33, color: '#FEDF4D' },
@@ -465,50 +529,77 @@ document.addEventListener('DOMContentLoaded', () => {
             { offset: 1.0, color: '#F86F12' }
         ];
 
-        drawTextLayers(line1Text, sharedFont, 0, line1Y, sharedFontSize, line1GradStops);
-
         const line2GradStops = [
             { offset: 0.0, color: '#FFFFD7' },
             { offset: 1.0, color: '#F6C13C' }
         ];
 
-        let line2Main = line2FullText;
-        let exclamChar = '';
+        if (state.onlyHyperRecovery) {
+            const line1Text = '超回復可能!';
 
-        if (line2FullText.endsWith('！') || line2FullText.endsWith('!')) {
-            line2Main = line2FullText.slice(0, -1);
-            exclamChar = '!';
-        }
+            textCacheCtx.font = `900 ${baseSize}px ${fontStack}`;
+            const line1Width = measureLineWithSpecialChars(line1Text, `900 ${baseSize}px ${fontStack}`);
 
-        if (exclamChar) {
-            textCacheCtx.font = sharedFont;
-            const mainWidth = textCacheCtx.measureText(line2Main).width;
-            const exclamWidth = textCacheCtx.measureText(exclamChar).width;
+            const slantFactor = 1.05;
+            const maxTextWidth = line1Width * slantFactor;
+            const maxAllowedWidth = textCacheCanvas.width * 0.88;
 
-            const scaledExclamWidth = exclamWidth * 1.1;
-            const totalWidth = mainWidth + scaledExclamWidth;
+            let fitScale = 1.0;
+            if (maxTextWidth > maxAllowedWidth) {
+                fitScale = maxAllowedWidth / maxTextWidth;
+            }
 
-            const startX = -totalWidth / 2;
-            const mainX = startX + mainWidth / 2;
-            const exclamX = startX + mainWidth + scaledExclamWidth / 2;
-
-            drawTextLayers(line2Main, sharedFont, mainX, line2Y, sharedFontSize, line2GradStops);
-
-            const exclamOffsetX = sharedFontSize * 0.06;
-            const exclamOffsetY = sharedFontSize * 0.04;
+            const sharedFontSize = baseSize * fitScale;
+            const sharedFont = `900 ${sharedFontSize}px ${fontStack}`;
 
             textCacheCtx.save();
-            textCacheCtx.translate(exclamX + exclamOffsetX, line2Y + exclamOffsetY);
-            textCacheCtx.scale(1.1, 1.1);
-            textCacheCtx.rotate((15 * Math.PI) / 180);
+            textCacheCtx.translate(centerX, centerY);
 
-            drawTextLayers(exclamChar, sharedFont, 0, 0, sharedFontSize, line2GradStops);
+            const slantRad = (state.textSlant * Math.PI) / 180;
+            textCacheCtx.transform(1, 0, Math.tan(slantRad), 1, 0, 0);
+
+            textCacheCtx.textAlign = 'center';
+            textCacheCtx.textBaseline = 'middle';
+
+            drawLineWithSpecialChars(line1Text, sharedFont, 0, sharedFontSize, line1GradStops);
+
             textCacheCtx.restore();
         } else {
-            drawTextLayers(line2FullText, sharedFont, 0, line2Y, sharedFontSize, line2GradStops);
-        }
+            const line1Text = '超回復';
+            const line2FullText = `${state.textKeyword || ''}パワー発動!`;
 
-        textCacheCtx.restore();
+            textCacheCtx.font = `900 ${baseSize}px ${fontStack}`;
+            const line1Width = measureLineWithSpecialChars(line1Text, `900 ${baseSize}px ${fontStack}`);
+            const line2Width = measureLineWithSpecialChars(line2FullText, `900 ${baseSize}px ${fontStack}`);
+
+            const slantFactor = 1.05;
+            const maxTextWidth = Math.max(line1Width, line2Width) * slantFactor;
+            const maxAllowedWidth = textCacheCanvas.width * 0.88;
+
+            let fitScale = 1.0;
+            if (maxTextWidth > maxAllowedWidth) {
+                fitScale = maxAllowedWidth / maxTextWidth;
+            }
+
+            const sharedFontSize = baseSize * fitScale;
+            const line1Y = -sharedFontSize * 0.6;
+            const line2Y = sharedFontSize * 0.6;
+            const sharedFont = `900 ${sharedFontSize}px ${fontStack}`;
+
+            textCacheCtx.save();
+            textCacheCtx.translate(centerX, centerY);
+
+            const slantRad = (state.textSlant * Math.PI) / 180;
+            textCacheCtx.transform(1, 0, Math.tan(slantRad), 1, 0, 0);
+
+            textCacheCtx.textAlign = 'center';
+            textCacheCtx.textBaseline = 'middle';
+
+            drawLineWithSpecialChars(line1Text, sharedFont, line1Y, sharedFontSize, line1GradStops);
+            drawLineWithSpecialChars(line2FullText, sharedFont, line2Y, sharedFontSize, line2GradStops);
+
+            textCacheCtx.restore();
+        }
 
         function drawSparkleShape(c) {
             const r = 4;
@@ -716,11 +807,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     canvas.addEventListener('mousedown', (e) => {
+        if (state.isCanvasLocked) return;
         state.isDragging = true;
         state.dragStart = getCanvasCoords(e);
     });
 
     canvas.addEventListener('touchstart', (e) => {
+        if (state.isCanvasLocked) return;
         state.isDragging = true;
         state.dragStart = getCanvasCoords(e);
     }, { passive: true });
@@ -972,17 +1065,55 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Input Control Listeners ---
+    if (onlyHyperRecoveryCheckbox) {
+        onlyHyperRecoveryCheckbox.addEventListener('change', (e) => {
+            state.onlyHyperRecovery = e.target.checked;
+            if (textKeywordInput) textKeywordInput.disabled = state.onlyHyperRecovery;
+            if (redrawBtn) redrawBtn.disabled = state.onlyHyperRecovery;
+
+            if (state.onlyHyperRecovery) {
+                if (keywordInputGroup) keywordInputGroup.classList.add('disabled');
+                if (presetsWrapper) presetsWrapper.classList.add('disabled');
+            } else {
+                if (keywordInputGroup) keywordInputGroup.classList.remove('disabled');
+                if (presetsWrapper) presetsWrapper.classList.remove('disabled');
+            }
+
+            validateKeywordInput();
+            renderCanvasSafe(0);
+        });
+    }
+
+    if (canvasLockCheckbox) {
+        canvasLockCheckbox.addEventListener('change', (e) => {
+            state.isCanvasLocked = e.target.checked;
+            if (state.isCanvasLocked) {
+                if (canvasCard) canvasCard.classList.add('canvas-locked');
+                if (canvasLockToggle) canvasLockToggle.classList.add('is-locked');
+                showToast('キャンバス操作をロックしました');
+            } else {
+                if (canvasCard) canvasCard.classList.remove('canvas-locked');
+                if (canvasLockToggle) canvasLockToggle.classList.remove('is-locked');
+                showToast('キャンバス操作のロックを解除しました');
+            }
+        });
+    }
+
     textKeywordInput.addEventListener('input', (e) => {
-        if (e.target.value.length > 20) {
-            e.target.value = e.target.value.slice(0, 20);
+        let val = e.target.value.replace(/！/g, '!').replace(/？/g, '?');
+        if (val.length > 20) {
+            val = val.slice(0, 20);
         }
-        state.textKeyword = e.target.value;
+        e.target.value = val;
+        state.textKeyword = val;
         validateKeywordInput();
     });
 
     presetChips.forEach(chip => {
         chip.addEventListener('click', () => {
-            const presetVal = (chip.getAttribute('data-preset') || '').slice(0, 20);
+            if (state.onlyHyperRecovery) return;
+            let presetVal = (chip.getAttribute('data-preset') || '').slice(0, 20);
+            presetVal = presetVal.replace(/！/g, '!').replace(/？/g, '?');
             textKeywordInput.value = presetVal;
             state.textKeyword = presetVal;
             validateKeywordInput();
@@ -1042,7 +1173,24 @@ document.addEventListener('DOMContentLoaded', () => {
         state.imgY = 0;
         state.imgScale = 100;
         state.imgRotation = 0;
+        state.dragTarget = 'image';
+        state.onlyHyperRecovery = false;
+        state.isCanvasLocked = false;
         state.sparkles = generateRandomSparkles();
+
+        if (onlyHyperRecoveryCheckbox) onlyHyperRecoveryCheckbox.checked = false;
+        if (keywordInputGroup) keywordInputGroup.classList.remove('disabled');
+        if (presetsWrapper) presetsWrapper.classList.remove('disabled');
+        if (textKeywordInput) textKeywordInput.disabled = false;
+        if (redrawBtn) redrawBtn.disabled = false;
+
+        if (canvasLockCheckbox) canvasLockCheckbox.checked = false;
+        if (canvasCard) canvasCard.classList.remove('canvas-locked');
+        if (canvasLockToggle) canvasLockToggle.classList.remove('is-locked');
+
+        dragTargetRadios.forEach(radio => {
+            radio.checked = (radio.value === 'image');
+        });
 
         textSizeInput.value = 70;
         textSizeVal.textContent = '70';
@@ -1074,7 +1222,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCanvasDimensions('3:2');
 
         renderCanvasSafe(50);
-        showToast('初期位置にリセットしました');
+        showToast('設定をリセットしました');
     });
 
     // --- Generate & Share Handlers ---
@@ -1109,7 +1257,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     generateBtn.addEventListener('click', () => {
-        if (isNgWordDetected) {
+        if (!state.onlyHyperRecovery && isNgWordDetected) {
             showToast('使用できないキーワードが含まれています');
             return;
         }
@@ -1122,7 +1270,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (shareStep2) shareStep2.style.display = 'none';
 
         // Twitter Intent Link Setup
-        const text = encodeURIComponent(`「超回復 ${state.textKeyword || '温泉'}パワー発動!」画像を作成しました！\n#なんでも超回復メーカー #ウマ娘`);
+        const shareText = state.onlyHyperRecovery
+            ? '「超回復可能!」画像を作成しました！\n#なんでも超回復メーカー #ウマ娘'
+            : `「超回復 ${state.textKeyword || '温泉'}パワー発動!」画像を作成しました！\n#なんでも超回復メーカー #ウマ娘`;
+        const text = encodeURIComponent(shareText);
         const twitterUrl = `https://twitter.com/intent/tweet?text=${text}`;
         twitterShareBtn.href = twitterUrl;
         if (shareStep2TwitterBtn) shareStep2TwitterBtn.href = twitterUrl;
