@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-2RNJ72H75W"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-2RNJ72H75W');
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ウマ娘 なんでも超回復メーカー</title>
+    <meta name="description" content="ウマ娘プリティーダービーの温泉郷シナリオの「超回復」演出を再現できるファンメイド画像メーカーです。お好きな画像で超回復してみましょう。">
+
+    <meta property="og:title" content="ウマ娘 なんでも超回復メーカー">
+    <meta property="og:description" content="ウマ娘の温泉郷シナリオ「超回復」文字演出を再現！お好きな画像で超回復しましょう。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://nyaftama.github.io/uma-hyper-recovery/">
+    <meta property="og:site_name" content="なんでも超回復メーカー">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <!-- HEIC / HEIF Image Converter -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
+
+    <link rel="stylesheet" href="css/style.css?v=1.02a">
+</head>
+
+<body>
+
+    <div class="container">
+        <!-- Header Meta -->
+        <div class="header-meta">
+            <div class="version-group">
+                <span class="version-badge">v1.02a</span>
+                <a href="https://github.com/nyaftama/uma-hyper-recovery#%E6%9B%B4%E6%96%B0%E5%B1%A5%E6%AD%B4"
+                    target="_blank" rel="noopener noreferrer" class="changelog-link">更新履歴</a>
+            </div>
+            <a href="https://nyaftama.github.io/" target="_blank" rel="noopener noreferrer" class="credit-link">
+                作った人: <strong>@nyaftama</strong>
+            </a>
+        </div>
+
+        <!-- Title Header -->
+        <h1 class="main-title">
+            ウマ娘 なんでも超回復メーカー<br>
+            <span class="sub-title">「超回復」画像作成ツール</span>
+        </h1>
+        <div class="eng-title" style="margin-bottom: 6px;">UMAMUSUME HYPER RECOVERY BANNER MAKER</div>
+        <div style="margin-bottom: 20px; padding: 0 5px;">
+            <a href="https://nyaftama.github.io/uma-ouen-baken/" target="_blank" rel="noopener noreferrer"
+                style="font-size: 0.85rem; color: #2e7d32; font-weight: bold; text-decoration: underline; display: inline-flex; align-items: center; gap: 4px;">
+                <span>推しバ券メーカー</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+            </a>
+        </div>
+
+        <!-- Card 1: Settings & Input -->
+        <div class="card">
+            <div class="card-title">
+                画像とテキストの設定
+            </div>
+
+            <!-- Image Upload Dropzone -->
+            <div id="dropzone" class="dropzone">
+                <svg class="dropzone-icon" viewBox="0 0 24 24">
+                    <path
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
+                </svg>
+                <div class="dropzone-text">画像を選択またはドラッグ＆ドロップ</div>
+                <div class="dropzone-subtext">クリップボードからの貼り付け（Ctrl+V / Cmd+V）にも対応</div>
+                <input type="file" id="fileInput" class="file-input" accept="image/*,.heic,.heif">
+            </div>
+
+            <!-- Dropzone Controls -->
+            <p class="dropzone-privacy-note">
+                <svg class="privacy-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <span>画像はブラウザー内で処理され、サーバー等へアップロードされることはありません。</span>
+            </p>
+
+            <div class="dropzone-controls">
+                <button type="button" id="pasteImgBtn" class="btn btn-secondary btn-small">
+                    画像を貼り付け
+                </button>
+                <button type="button" id="resetImgBtn" class="btn btn-secondary btn-small">
+                    画像をリセット
+                </button>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+
+            <!-- Text Keyword Input (Line 2) -->
+            <div class="form-group">
+                <label for="textKeyword" class="form-label">発動キーワード（「超回復 ○○パワー発動!」）</label>
+                <div class="only-hyper-recovery-wrapper">
+                    <label class="toggle-wrapper">
+                        <input type="checkbox" id="onlyHyperRecoveryCheckbox">
+                        <span>超回復可能!</span>
+                    </label>
+                </div>
+                <div class="keyword-input-wrapper" id="keywordInputGroup">
+                    <input type="text" id="textKeyword" class="input-text" value="温泉" placeholder="例: 温泉"
+                        maxlength="20">
+                    <button type="button" id="redrawBtn" class="btn btn-secondary btn-small">再描画</button>
+                </div>
+                <div id="textKeywordError" class="input-error-msg" style="display: none;">
+                    <svg class="error-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"
+                        style="vertical-align: middle; margin-right: 4px;">
+                        <path
+                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                    </svg>
+                    <span>エラーが発生しました</span>
+                </div>
+
+                <!-- Quick Preset Chips -->
+                <div class="presets-wrapper">
+                    <button type="button" class="preset-chip" data-preset="温泉">温泉</button>
+                    <button type="button" class="preset-chip" data-preset="睡眠">睡眠</button>
+                    <button type="button" class="preset-chip" data-preset="休日">休日</button>
+                    <button type="button" class="preset-chip" data-preset="焼肉">焼肉</button>
+                    <button type="button" class="preset-chip" data-preset="ラーメン">ラーメン</button>
+                    <button type="button" class="preset-chip" data-preset="推し活">推し活</button>
+                    <button type="button" class="preset-chip" data-preset="ガチャ">ガチャ</button>
+                    <button type="button" class="preset-chip" data-preset="サウナ">サウナ</button>
+                    <button type="button" class="preset-chip" data-preset="二度寝">二度寝</button>
+                    <button type="button" class="preset-chip" data-preset="ゲーム">ゲーム</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Card 2: Preview Canvas Area -->
+        <div class="card canvas-card">
+            <div class="card-title" style="width: 100%;">
+                プレビュー（文字や画像を移動できます）
+            </div>
+
+            <!-- Canvas Toolbar Controls -->
+            <div class="canvas-toolbar">
+                <div class="aspect-ratio-selector">
+                    <div class="custom-dropdown" id="aspectDropdown">
+                        <button type="button" class="dropdown-trigger" id="aspectDropdownTrigger"
+                            aria-haspopup="listbox" aria-expanded="false" title="アスペクト比の変更">
+                            <span class="dropdown-selected-icon" id="aspectSelectedIcon">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="6" width="18" height="12" rx="2" />
+                                </svg>
+                            </span>
+                            <span class="dropdown-selected-text" id="aspectSelectedText">3:2 (横長)</span>
+                            <svg class="dropdown-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M6 9l6 6 6-6" />
+                            </svg>
+                        </button>
+                        <div class="dropdown-menu" id="aspectDropdownMenu" role="listbox">
+                            <button type="button" class="dropdown-item" data-aspect="16:9" role="option"
+                                aria-selected="false">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="2" y="7.5" width="20" height="9" rx="2" />
+                                </svg>
+                                <span>16:9 (横長)</span>
+                            </button>
+                            <button type="button" class="dropdown-item active" data-aspect="3:2" role="option"
+                                aria-selected="true">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="6" width="18" height="12" rx="2" />
+                                </svg>
+                                <span>3:2 (横長)</span>
+                            </button>
+                            <button type="button" class="dropdown-item" data-aspect="4:3" role="option"
+                                aria-selected="false">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3.5" y="5.5" width="17" height="13" rx="2" />
+                                </svg>
+                                <span>4:3 (横長)</span>
+                            </button>
+                            <button type="button" class="dropdown-item" data-aspect="1:1" role="option"
+                                aria-selected="false">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="4" y="4" width="16" height="16" rx="2" />
+                                </svg>
+                                <span>1:1 (正方形)</span>
+                            </button>
+                            <button type="button" class="dropdown-item" data-aspect="3:4" role="option"
+                                aria-selected="false">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="5.5" y="3.5" width="13" height="17" rx="2" />
+                                </svg>
+                                <span>3:4 (縦長)</span>
+                            </button>
+                            <button type="button" class="dropdown-item" data-aspect="2:3" role="option"
+                                aria-selected="false">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="6" y="3" width="12" height="18" rx="2" />
+                                </svg>
+                                <span>2:3 (縦長)</span>
+                            </button>
+                            <button type="button" class="dropdown-item" data-aspect="9:16" role="option"
+                                aria-selected="false">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="7.5" y="2" width="9" height="20" rx="2" />
+                                </svg>
+                                <span>9:16 (縦長)</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="drag-target-selector">
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="dragTarget" value="text">
+                            <span class="radio-custom"></span>
+                            <span class="radio-text">文字を移動</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="dragTarget" value="image" checked>
+                            <span class="radio-custom"></span>
+                            <span class="radio-text">画像を移動</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="rotate-controls">
+                    <button type="button" id="rotateImgLeftBtn" class="btn btn-secondary btn-small">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round"
+                            style="vertical-align: middle; margin-right: 4px;">
+                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                            <path d="M3 3v5h5" />
+                        </svg>
+                        画像を左回転
+                    </button>
+                    <button type="button" id="rotateImgRightBtn" class="btn btn-secondary btn-small">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round"
+                            style="vertical-align: middle; margin-right: 4px;">
+                            <path d="M21 12a9 9 0 1 1-9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                            <path d="M21 3v5h-5" />
+                        </svg>
+                        画像を右回転
+                    </button>
+                </div>
+            </div>
+
+            <div class="canvas-wrapper">
+                <label class="canvas-lock-toggle" id="canvasLockToggle" title="キャンバスの操作をロック / 解除">
+                    <input type="checkbox" id="canvasLockCheckbox">
+                    <svg class="lock-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    <span>ロック</span>
+                </label>
+                <canvas id="previewCanvas" width="900" height="600"></canvas>
+            </div>
+
+            <div class="canvas-controls">
+                <button type="button" id="shuffleSparklesBtn" class="btn btn-secondary btn-small">
+                    キラキラをシャッフル
+                </button>
+                <button type="button" id="resetBtn" class="btn btn-secondary btn-small">
+                    設定をリセット
+                </button>
+            </div>
+
+            <!-- Advanced Settings Accordion -->
+            <details class="advanced-settings">
+                <summary>詳細設定（文字サイズ・位置・画像拡大率）</summary>
+
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label for="textSize" class="form-label">文字サイズ</label>
+                        <div class="range-wrapper">
+                            <input type="range" id="textSize" class="range-input" min="40" max="150" value="70">
+                            <span id="textSizeVal" class="range-val">70</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="posY" class="form-label">文字の上下位置 (Y)</label>
+                        <div class="range-wrapper">
+                            <input type="range" id="posY" class="range-input" min="10" max="90" value="75">
+                            <span id="posYVal" class="range-val">75%</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="posX" class="form-label">文字の左右位置 (X)</label>
+                        <div class="range-wrapper">
+                            <input type="range" id="posX" class="range-input" min="10" max="90" value="50">
+                            <span id="posXVal" class="range-val">50%</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="imgScale" class="form-label">画像の拡大率</label>
+                        <div class="range-wrapper">
+                            <input type="range" id="imgScale" class="range-input" min="50" max="250" value="100">
+                            <span id="imgScaleVal" class="range-val">100%</span>
+                        </div>
+                    </div>
+                </div>
+            </details>
+        </div>
+
+        <!-- Main Action Buttons -->
+        <div class="btn-group">
+            <button type="button" id="generateBtn" class="btn btn-primary">
+                「超回復」画像を生成
+            </button>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>※当ツールは「ウマ娘 プリティーダービー」の非公式ツールです。</p>
+            <p>&copy; 2026 nyaftama</p>
+        </footer>
+    </div>
+
+    <!-- Save / Share Modal -->
+    <div id="shareModal" class="modal-overlay">
+        <div class="modal-content">
+            <!-- Step 1: Default View -->
+            <div id="shareStep1">
+                <h3 class="modal-title">超回復画像が完成しました！</h3>
+                <p class="modal-desc">
+                    画像を長押し（または右クリック）でデバイスに保存できます。<br>
+                    <span
+                        style="color: var(--primary-color); font-weight: bold;">X（Twitter）でシェアする際は、保存した画像を添付してください。</span>
+                </p>
+
+                <div class="modal-image-wrapper">
+                    <img id="shareImagePreview" src="" alt="超回復画像">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" id="downloadModalBtn" class="btn btn-primary">
+                        ダウンロード
+                    </button>
+                    <a id="twitterShareBtn" class="btn btn-twitter" href="#" target="_blank" rel="noopener noreferrer">
+                        Xでシェア
+                    </a>
+                </div>
+
+                <div class="modal-actions-secondary">
+                    <button type="button" id="closeModalBtn" class="btn btn-secondary" style="width: 100%;">
+                        閉じる
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script src="js/app.js?v=1.02a" defer></script>
+</body>
+
+</html>
