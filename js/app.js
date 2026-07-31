@@ -107,7 +107,10 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadNgWords() {
         let loadedText = '';
         try {
-            const response = await fetch('data/ng_words.txt');
+            const versionBadge = document.querySelector('.version-badge');
+            const version = versionBadge ? versionBadge.textContent.trim().replace(/^v/, '') : '';
+            const fetchUrl = version ? `data/ng_words.txt?v=${version}` : 'data/ng_words.txt';
+            const response = await fetch(fetchUrl);
             if (response.ok) {
                 const rawText = await response.text();
                 loadedText = decodeTripleBase64(rawText);
