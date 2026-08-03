@@ -848,7 +848,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('mouseup', () => { state.isDragging = false; });
     window.addEventListener('touchend', () => { state.isDragging = false; });
 
-    // --- Image File Upload Handlers (Native Decode First -> heic2any Fallback) ---
+    // --- Image File Upload Handlers (Native Decode First -> heic-to Fallback) ---
     function handleFile(file) {
         if (!file) return;
 
@@ -876,19 +876,21 @@ document.addEventListener('DOMContentLoaded', () => {
         img.onerror = async () => {
             URL.revokeObjectURL(objectUrl);
 
-            // Step 2: Fallback to JS heic2any for browsers that don't support native HEIC (e.g. Chrome on Windows/Android)
+            // Step 2: Fallback to JS heic-to for browsers that don't support native HEIC (e.g. Chrome on Windows/Android)
             if (isHeic) {
                 showToast('HEIC画像を変換中...', 4000);
                 try {
-                    if (typeof heic2any === 'undefined') {
+                    const converter = (typeof HeicTo !== 'undefined') ? HeicTo :
+                                      (typeof heicTo !== 'undefined') ? heicTo :
+                                      (window.HeicTo || window.heicTo || null);
+                    if (!converter) {
                         showToast('HEIC画像の変換に対応していません。JPEG/PNG画像をご利用ください');
                         return;
                     }
 
-                    const heicBlob = new Blob([file], { type: 'image/heic' });
-                    const convertedBlob = await heic2any({
-                        blob: heicBlob,
-                        toType: 'image/jpeg',
+                    const convertedBlob = await converter({
+                        blob: file,
+                        type: 'image/jpeg',
                         quality: 0.92
                     });
 
